@@ -1,0 +1,13 @@
+[Unit]
+Description=CyberAI Offensive API
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/dione/cyberai
+ExecStart=/home/dione/cyberai/venv/bin/python /home/dione/cyberai/src/api/main.py
+Restart=always
+User=dione
+
+[Install]
+WantedBy=multi-user.target

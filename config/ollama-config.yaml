@@ -1,0 +1,8 @@
+ollama:
+	models:
+		- codellama:7b-code-q4_0
+		- llama2-uncensored:7b-chat-q4_0
+		- cyberdolphin:7b-q4_0
+	custom:
+		- cyberhack
+	api_url: http://localhost:11434

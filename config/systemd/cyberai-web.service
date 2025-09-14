@@ -1,0 +1,13 @@
+[Unit]
+Description=CyberAI Web Static Server
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/dione/cyberai/src/web
+ExecStart=/usr/bin/python3 -m http.server 8080
+Restart=always
+User=dione
+
+[Install]
+WantedBy=multi-user.target

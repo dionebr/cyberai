@@ -1,0 +1,9 @@
+.terminal {
+	background: #111;
+	color: #00ff00;
+	font-family: 'Courier New', monospace;
+	padding: 1em;
+	border-radius: 8px;
+	border: 1px solid #00ff00;
+	box-shadow: 0 0 10px #00ff0033;
+}

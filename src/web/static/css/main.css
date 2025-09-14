@@ -1,0 +1,15 @@
+.bg-hacker {
+	background-color: #0a0a0a;
+}
+.terminal-font {
+	font-family: 'Courier New', monospace;
+}
+.border-hacker {
+	border-color: #00ff00;
+}
+.text-green-400 {
+	color: #00ff00;
+}
+.scrollbar-hide::-webkit-scrollbar {
+	display: none;
+}
