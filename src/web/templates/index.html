@@ -161,8 +161,8 @@
 
     <script>
     // Config
-    // Use proxy via Nginx: mesma origem, sem CORS
-    const API_BASE = '/api';
+    // Autodetecta: quando servido via HTTP(S), usa /api (Nginx proxy); se abrir via file://, usa localhost:8000
+    const API_BASE = (location.origin.startsWith('http')) ? '/api' : 'http://localhost:8000';
     const PAYLOADS = {
         nmap: 'Gere um comando Nmap agressivo com detecção de versão e scripts. Alvo: 10.10.11.123',
         reverse_shell: 'Crie reverse shells em Bash, Python, PowerShell e Node para 10.10.11.123:4444',
