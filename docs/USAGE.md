@@ -1,29 +1,55 @@
 # Guia de Uso
 
-## API
+Importante: os arquivos de modelo (.gguf) NÃO são versionados. O modelo será baixado localmente durante a instalação e mantido em `models/`.
 
-Ative o ambiente virtual antes de iniciar a API:
+## Opção A — Docker (recomendado)
+
+1) Suba os serviços
 ```bash
-source .venv/bin/activate
-python -m src.api.main
+docker-compose up --build -d
 ```
 
-Principais endpoints:
-- `POST /generate` — Gera resposta LLM para contexto técnico
-- `POST /generate_exploit` — Gera exploit customizado
-- `GET /techniques` — Lista técnicas de pentest disponíveis
+2) Acesse a interface web
+- Navegador: http://localhost
+- A API é acessada via proxy em `/api` (ex: http://localhost/api/generate)
 
-Exemplo de requisição via `curl`:
+3) Logs (opcional)
 ```bash
-curl -X POST http://localhost:8000/generate \
+docker-compose logs -f --tail=200
+```
+
+## Opção B — Execução local (sem Docker)
+
+1) Instale dependências e baixe o modelo
+```bash
+bash src/scripts/install.sh
+```
+
+2) Inicie a API e verificação
+```bash
+bash src/scripts/start.sh
+```
+
+3) Interface Web
+- Via Nginx (Docker): http://localhost
+- Ou abra diretamente o arquivo: `src/web/templates/index.html`
+
+## Endpoints principais
+- POST /api/generate — Gera resposta técnica do LLM
+- POST /api/generate_exploit — Gera exploit customizado
+- GET /api/techniques — Lista técnicas suportadas
+- GET /api/models — Lista modelos disponíveis (nome do GGUF)
+
+Exemplo via curl
+```bash
+curl -X POST http://localhost/api/generate \
 	-H 'Content-Type: application/json' \
 	-d '{"prompt": "Explique buffer overflow em C"}'
 ```
 
-## Interface Web
-
-Abra `src/web/templates/index.html` no navegador.
-
-- Preencha contexto, técnica e alvo
-- Envie comandos ou perguntas técnicas
-- Gere exploits informando CVE, aplicação e SO
+## Erros comuns
+- 503 Modelo indisponível
+	- Rode o download do modelo: `bash src/scripts/download-model.sh`
+	- Verifique se `llama-cpp-python` está instalado (requirements.txt)
+- CORS/Portas
+	- A interface usa `/api`. Certifique-se de acessar via http://localhost com o Nginx do Docker.

@@ -1,23 +1,7 @@
 #!/bin/bash
 
-echo "[+] Iniciando CyberAI Offensive Assistant"
+echo "[+] Iniciando CyberAI Offensive Suite"
 echo "[+] Verificando dependências..."
-
-
-# Verificar se Ollama está rodando
-if systemctl list-units --type=service | grep -q ollama; then
-	if ! systemctl is-active --quiet ollama; then
-		echo "[+] Iniciando serviço Ollama..."
-		sudo systemctl start ollama
-		sleep 3
-	fi
-else
-	if ! pgrep -f "ollama serve" > /dev/null; then
-		echo "[+] Iniciando Ollama manualmente..."
-		nohup ollama serve > /dev/null 2>&1 &
-		sleep 3
-	fi
-fi
 
 
 # Verificar versão do Python e ambiente virtual
@@ -47,11 +31,11 @@ if [ ! -f "venv/bin/activate" ]; then
 fi
 
 
-# Verificar se os modelos estão disponíveis
-echo "[+] Verificando modelos..."
-if ! ollama list | grep -q "cyberhack"; then
-    echo "[!] Modelo cyberhack não encontrado. Criando..."
-    ollama create cyberhack -f models/cyberhack-modellama.modelfile
+echo "[+] Verificando modelo GGUF..."
+MODEL_PATH="models/mistral-7b-instruct-v0.2.Q4_K_M.gguf"
+if [ ! -f "$MODEL_PATH" ]; then
+	echo "[!] Modelo não encontrado em $MODEL_PATH. Rode: bash src/scripts/download-model.sh"
+	exit 1
 fi
 
 
@@ -67,8 +51,8 @@ sleep 5
 # Verificar se a API está respondendo
 if curl -s http://localhost:8000/techniques > /dev/null; then
     echo "[+] API inicializada com sucesso!"
-    echo "[+] URL da API: http://localhost:8000"
-    echo "[+] Interface web: abra src/web/templates/index.html no navegador"
+	echo "[+] URL da API: http://localhost:8000"
+	echo "[+] Interface web: http://localhost (via Nginx/docker-compose)"
 else
     echo "[!] Erro ao inicializar API. Verifique as portas ou dependências."
     exit 1
