@@ -161,7 +161,8 @@
 
     <script>
     // Config
-    const API_BASE = 'http://localhost:8000';
+    // Use proxy via Nginx: mesma origem, sem CORS
+    const API_BASE = '/api';
     const PAYLOADS = {
         nmap: 'Gere um comando Nmap agressivo com detecção de versão e scripts. Alvo: 10.10.11.123',
         reverse_shell: 'Crie reverse shells em Bash, Python, PowerShell e Node para 10.10.11.123:4444',
@@ -325,6 +326,16 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ prompt: message, technique: '', context: '', target: '' })
             });
+            if (!res.ok) {
+                let detail = '';
+                try { const err = await res.json(); detail = err.detail || ''; } catch {}
+                if (res.status === 503) {
+                    addMessage('bot', 'Modelo indisponível no servidor. Baixe o modelo GGUF e reinicie a API.');
+                } else {
+                    addMessage('bot', `Erro da API (${res.status}). ${detail}`.trim());
+                }
+                return;
+            }
             const data = await res.json();
             addMessage('bot', data.response || 'Sem resposta.');
         } catch (err) {

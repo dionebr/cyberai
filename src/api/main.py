@@ -78,6 +78,9 @@ async def generate_response(request: PromptRequest):
 			"technique": request.technique,
 			"context": request.context
 		}
+	except RuntimeError as e:
+		logger.error(f"Modelo indisponível: {str(e)}")
+		raise HTTPException(status_code=503, detail=str(e))
 	except Exception as e:
 		logger.error(f"Error generating response: {str(e)}")
 		raise HTTPException(status_code=500, detail=str(e))
@@ -113,6 +116,9 @@ async def generate_exploit(request: ExploitRequest):
 				"target_app": request.target_app
 			}
 		}
+	except RuntimeError as e:
+		logger.error(f"Modelo indisponível: {str(e)}")
+		raise HTTPException(status_code=503, detail=str(e))
 	except Exception as e:
 		logger.error(f"Error generating exploit: {str(e)}")
 		raise HTTPException(status_code=500, detail=str(e))
@@ -123,7 +129,7 @@ async def get_techniques():
 
 @app.get("/models")
 async def get_models():
-	return {"models": ["llama-2-7b.Q4_K_M.gguf"]}
+	return {"models": ["mistral-7b-instruct-v0.2.Q4_K_M.gguf"]}
 
 if __name__ == "__main__":
 	import uvicorn
