@@ -5,8 +5,6 @@ RUN apt-get update && \
 			build-essential cmake curl && \
 		rm -rf /var/lib/apt/lists/*
 
-# Build llama-cpp-python from source against glibc (default PyPI)
-
 COPY requirements.txt ./
 RUN python -m pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt

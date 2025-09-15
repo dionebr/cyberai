@@ -1,22 +1,33 @@
 import os
 
-# Configuração dos modelos disponíveis
+def detect_gpu_support():
+    """Detecta se GPU CUDA está disponível"""
+    try:
+        import llama_cpp
+        # Verifica se llama-cpp-python foi compilado com suporte CUDA
+        return hasattr(llama_cpp.Llama, 'n_gpu_layers')
+    except ImportError:
+        return False
+
+# Configuração dos modelos disponíveis com suporte GPU opcional
 MODELS_CONFIG = {
     "tiny": {
         "path": os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../models/tinyllama-1.1b-chat-v0.3.Q4_K_M.gguf')),
         "n_ctx": 768,
         "n_threads": 8, 
-        "n_batch": 64,
+        "n_batch": 512 if detect_gpu_support() else 64,
+        "n_gpu_layers": 35 if detect_gpu_support() else 0,
         "max_tokens": 256,
-        "description": "Modelo rápido para tarefas simples (600MB)"
+        "description": f"Modelo rápido para tarefas simples (600MB){' - GPU Acelerado' if detect_gpu_support() else ''}"
     },
     "standard": {
         "path": os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../models/mistral-7b-instruct-v0.2.Q4_K_M.gguf')),
         "n_ctx": 2048,
         "n_threads": 4,
-        "n_batch": 32, 
+        "n_batch": 512 if detect_gpu_support() else 32,
+        "n_gpu_layers": 32 if detect_gpu_support() else 0,
         "max_tokens": 768,
-        "description": "Modelo completo para tarefas complexas (4GB)"
+        "description": f"Modelo completo para tarefas complexas (4GB){' - GPU Acelerado' if detect_gpu_support() else ''}"
     }
 }
 
@@ -56,14 +67,27 @@ class LlamaClient:
         
         # Carrega o modelo apenas se mudou
         if self.current_model_config != self.model_config:
+            gpu_layers = self.model_config.get("n_gpu_layers", 0)
             print(f"🚀 Carregando modelo: {self.model_config['description']}")
-            self.model = Llama(
-                model_path=self.model_config["path"],
-                n_ctx=self.model_config["n_ctx"],
-                n_threads=self.model_config["n_threads"], 
-                n_batch=self.model_config["n_batch"],
-                verbose=False
-            )
+            if gpu_layers > 0:
+                print(f"🎮 GPU Layers: {gpu_layers} (Aceleração GPU ativada)")
+            else:
+                print("💻 CPU Only (Sem GPU)")
+                
+            # Parâmetros do modelo com ou sem GPU
+            model_params = {
+                "model_path": self.model_config["path"],
+                "n_ctx": self.model_config["n_ctx"],
+                "n_threads": self.model_config["n_threads"],
+                "n_batch": self.model_config["n_batch"],
+                "verbose": False
+            }
+            
+            # Adicionar GPU layers apenas se disponível
+            if gpu_layers > 0:
+                model_params["n_gpu_layers"] = gpu_layers
+                
+            self.model = Llama(**model_params)
             self.current_model_config = self.model_config
 
     def generate(self, prompt, temperature=0.7, top_p=0.9, max_tokens=None):

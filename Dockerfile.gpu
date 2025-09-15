@@ -1,0 +1,29 @@
+FROM pytorch/pytorch:2.1.0-cuda11.8-cudnn8-devel
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        build-essential cmake curl git && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set CUDA environment variables
+ENV CUDA_HOME=/usr/local/cuda
+ENV PATH=${CUDA_HOME}/bin:${PATH}
+ENV LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
+ENV FORCE_CMAKE=1
+ENV CMAKE_ARGS="-DLLAMA_CUBLAS=on"
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt ./
+RUN pip install --upgrade pip setuptools wheel
+
+# Install llama-cpp-python with CUDA support
+RUN CMAKE_ARGS="-DLLAMA_CUBLAS=on" pip install llama-cpp-python --force-reinstall --no-deps
+
+# Install other requirements
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+EXPOSE 8000
+CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
