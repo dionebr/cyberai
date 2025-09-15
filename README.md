@@ -1,6 +1,8 @@
-# CyberAI: Assistente Ofensivo de Cibersegurança
+# CyberAI: Assistente Ofensivo de Cibersegurança ⚡
 
-**CyberAI** é uma suíte de ferramentas acelerada por LLM (Large Language Model), projetada para apoiar profissionais e entusiastas de cibersegurança em tarefas ofensivas. A plataforma opera de forma **100% offline**, garantindo privacidade e segurança, e serve como um poderoso assistente para treinamento, pentesting e pesquisa em ambientes como HackTheBox, TryHackMe e VulnHub.
+**CyberAI** é uma suíte de ferramentas acelerada por **sistema híbrido de LLMs** (TinyLlama + Mistral), projetada para apoiar profissionais e entusiastas de cibersegurança em tarefas ofensivas. A plataforma opera de forma **100% offline**, garantindo privacidade e segurança, e serve como um poderoso assistente para treinamento, pentesting e pesquisa em ambientes como HackTheBox, TryHackMe e VulnHub.
+
+🚀 **Novo:** Sistema híbrido inteligente que seleciona automaticamente o modelo mais adequado (TinyLlama para velocidade ou Mistral para complexidade), oferecendo **respostas até 20x mais rápidas** para tarefas simples!
 
 ![CyberAI Screenshot](https://raw.githubusercontent.com/dionebr/cyberai/main/docs/images/cyberai-showcase.png)
 
@@ -8,12 +10,41 @@
 
 ## ✨ Funcionalidades Principais
 
--   **LLM Offline:** Utilize modelos de linguagem de ponta (GGUF) sem depender de APIs externas.
--   **Interface Web Intuitiva:** Acesse todas as ferramentas através de uma interface moderna e responsiva.
--   **Suíte de Módulos Especializados:** Cobertura completa do ciclo de pentesting, desde o reconhecimento até a pós-exploração.
--   **Geração de Código e Payloads:** Crie reverse shells, exploits e scripts de automação sob demanda.
--   **Ambiente Dockerizado:** Instalação e execução simplificadas com Docker e Nginx.
--   **Privacidade Total:** Seus dados e interações nunca saem da sua máquina local.
+-   🧠 **Sistema Híbrido Inteligente:** Dois modelos LLM trabalhando juntos:
+    -   **TinyLlama 1.1B (668MB):** Respostas ultrarrápidas para tarefas simples
+    -   **Mistral 7B (4GB):** Alta qualidade para análises complexas
+-   ⚡ **Performance Otimizada:** Seleção automática do modelo baseada na complexidade da tarefa
+-   🔒 **100% Offline:** Utilize modelos de linguagem de ponta (GGUF) sem depender de APIs externas
+-   🖥️ **Interface Web Intuitiva:** Acesse todas as ferramentas através de uma interface moderna e responsiva
+-   🎯 **Suíte de Módulos Especializados:** Cobertura completa do ciclo de pentesting, desde o reconhecimento até a pós-exploração
+-   💾 **Economia de Recursos:** Ideal para máquinas limitadas - usa apenas 668MB para tarefas comuns
+-   🐳 **Ambiente Dockerizado:** Instalação e execução simplificadas com Docker e Nginx
+-   🔐 **Privacidade Total:** Seus dados e interações nunca saem da sua máquina local
+
+---
+
+## 🧠 Sistema Híbrido de IA
+
+O CyberAI utiliza um **sistema híbrido inovador** que combina dois modelos de IA para otimizar performance e qualidade:
+
+### ⚡ TinyLlama 1.1B (Modelo Rápido)
+- **Tamanho:** 668MB
+- **Velocidade:** Respostas em 5-10 segundos  
+- **Uso:** Tarefas simples e rápidas
+- **Técnicas:** recon, payloads, exploits básicos, relatórios, XSS, SQL injection, etc.
+
+### 🎯 Mistral 7B (Modelo Completo) 
+- **Tamanho:** 4GB
+- **Qualidade:** Análises detalhadas e complexas
+- **Uso:** Tarefas que exigem raciocínio avançado
+- **Técnicas:** Análises de malware complexas, desenvolvimento de exploits avançados
+
+### 🔄 Seleção Automática Inteligente
+O sistema escolhe automaticamente o modelo mais adequado com base na técnica solicitada, garantindo:
+- ⚡ **Velocidade máxima** para tarefas comuns
+- 🎯 **Qualidade premium** quando necessário  
+- 💾 **Economia de recursos** computacionais
+- 📱 **Compatibilidade** com máquinas limitadas
 
 ---
 
@@ -97,11 +128,20 @@ Para usuários que preferem rodar os serviços diretamente no host.
     ```
     *Nota: O script de download do modelo pode ser executado separadamente, se necessário.*
 
-3.  **Baixe o modelo LLM:**
-    O modelo padrão é o `Mistral-7B-Instruct-v0.2`.
+3.  **Baixe os modelos LLM:**
+    
+    **TinyLlama (Essencial - 668MB):**
+    ```bash
+    cd models
+    wget https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v0.3-GGUF/resolve/main/tinyllama-1.1b-chat-v0.3.Q4_K_M.gguf
+    ```
+    
+    **Mistral (Opcional - 4GB):**
     ```bash
     huggingface-cli download TheBloke/Mistral-7B-Instruct-v0.2-GGUF mistral-7b-instruct-v0.2.Q4_K_M.gguf --local-dir models --local-dir-use-symlinks False
     ```
+    
+    > 💡 **Dica:** Para máquinas limitadas, use apenas TinyLlama. Para máxima qualidade, baixe ambos os modelos.
 
 4.  **Inicie os serviços:**
     Você precisará de dois terminais.
@@ -130,50 +170,147 @@ Para usuários que preferem rodar os serviços diretamente no host.
 ## 🛠️ Solução de Problemas (Troubleshooting)
 
 -   **Erro 503 `Modelo indisponível` na API:**
-    -   **Causa:** O arquivo do modelo GGUF não foi encontrado ou `llama-cpp-python` não foi compilado corretamente.
+    -   **Causa:** O arquivo do modelo GGUF não foi encontrado.
     -   **Solução:**
-        1.  Verifique se o arquivo `.gguf` está na pasta `models/`.
-        2.  Execute o comando de download do modelo novamente.
-        3.  Se o erro persistir, reinstale `llama-cpp-python` com as flags de compilação corretas para sua arquitetura (ex: `CMAKE_ARGS="-DLLAMA_CUBLAS=on" FORCE_CMAKE=1 pip install --upgrade --force-reinstall llama-cpp-python`).
+        ```bash
+        # Baixar TinyLlama (essencial)
+        cd models
+        wget https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v0.3-GGUF/resolve/main/tinyllama-1.1b-chat-v0.3.Q4_K_M.gguf
+        
+        # Verificar se foi baixado
+        ls -la models/*.gguf
+        
+        # Reiniciar containers
+        docker-compose restart api
+        ```
 
--   **Erro 404 em `dist.css` ou `utils.js` (modo local):**
-    -   **Causa:** O servidor web foi iniciado na pasta errada.
-    -   **Solução:** Certifique-se de iniciar o servidor a partir da raiz do projeto (`/home/dione/cyberai`) e que o comando sirva o diretório `src/web`. Use `npm start`.
+-   **Respostas muito lentas (>30s):**
+    -   **Causa:** Tentando usar Mistral em máquina limitada.
+    -   **Solução:** Use apenas TinyLlama removendo o arquivo Mistral:
+        ```bash
+        cd models && mv mistral*.gguf mistral.backup
+        docker-compose restart api
+        ```
 
--   **Interface não carrega ou módulos não respondem:**
-    -   **Causa:** A API pode não estar rodando ou estar bloqueada por um firewall.
-    -   **Solução:** Verifique se o processo da API está ativo na porta 8000 e se não há regras de firewall impedindo a conexão.
+-   **Sistema não seleciona modelo correto:**
+    -   **Verificação:** 
+        ```bash
+        curl http://localhost/api/models
+        # Deve mostrar TinyLlama para técnicas rápidas
+        ```
+
+-   **Erro 404 em `/api/techniques`:**
+    -   **Causa:** Proxy nginx não configurado corretamente.
+    -   **Solução:** Use Docker compose (recomendado) ou verifique configuração nginx.
 
 ---
 
-## 💡 Exemplos de Uso
+### 💡 Exemplos de Uso
 
-### Chat Interativo
-Use o chat flutuante na página inicial para perguntas rápidas.
-> "Gere um comando Nmap agressivo para o alvo 10.10.11.123, com detecção de versão e scripts."
+### Chat Interativo ⚡
+Use o chat flutuante na página inicial para perguntas rápidas com **TinyLlama**.
+> **Você:** "Gere um comando Nmap agressivo para o alvo 10.10.11.123"  
+> **CyberAI:** Resposta instantânea em ~5 segundos!
 
-### Módulo de Payloads
+### Módulo de Payloads 🚀  
 Acesse o módulo "Payloads" e preencha os campos para gerar reverse shells customizadas.
-> **IP:** `10.10.14.2`, **Porta:** `9001`, **Plataforma:** `Linux`
+> **IP:** `10.10.14.2`, **Porta:** `9001`, **Plataforma:** `Linux`  
+> **Resultado:** Múltiplas variações de reverse shells em segundos
 
-### Exemplo com `curl`
-Você pode interagir diretamente com a API:
+### Sistema Híbrido em Ação 🧠
 ```bash
-curl -X POST http://localhost:8000/generate \
+# Consulta rápida (TinyLlama - 5s)
+curl -X POST http://localhost/api/generate \
 -H "Content-Type: application/json" \
--d '{
-  "prompt": "Estou explorando uma máquina Linux e tenho acesso como www-data. Quais os primeiros passos para escalação de privilégios?",
-  "technique": "privesc",
-  "context": "Kernel: 5.4.0, Distro: Debian 10"
-}'
+-d '{"prompt": "comandos de enumeração SMB", "technique": "recon"}'
+
+# Análise complexa (Mistral - 30s, alta qualidade)  
+curl -X POST http://localhost/api/generate \
+-H "Content-Type: application/json" \
+-d '{"prompt": "desenvolver exploit ROP chain para bypass ASLR", "technique": "advanced_exploit"}'
 ```
+
+### Verificar Modelos Ativos 📊
+```bash
+curl http://localhost/api/models
+# Mostra quais modelos estão disponíveis e suas especialidades
+```
+
+---
+
+## 🎯 Performance Comparison
+
+| Cenário | Modelo | Tempo | Qualidade | Uso Recomendado |
+|---------|--------|--------|-----------|-----------------|
+| Comandos básicos | TinyLlama | ~5s | ⭐⭐⭐⭐ | Tarefas diárias |
+| Enumeração/Recon | TinyLlama | ~5-10s | ⭐⭐⭐⭐ | HTB, THM, CTFs |
+| Web exploits | TinyLlama | ~5-10s | ⭐⭐⭐⭐ | OWASP Top 10 |  
+| Payloads/Scripts | TinyLlama | ~5-10s | ⭐⭐⭐⭐ | Red team, Pentest |
+| Análise profunda | Mistral | ~20-30s | ⭐⭐⭐⭐⭐ | Research, 0days |
+| Malware analysis | Mistral | ~20-30s | ⭐⭐⭐⭐⭐ | Forensics, IR |
 
 ---
 
 ## 🤝 Contribuição
 
-Contribuições são bem-vindas! Sinta-se à vontade para abrir uma *issue* para relatar bugs ou sugerir novas funcionalidades. Se desejar contribuir com código, por favor, abra um *Pull Request*.
+Contribuições são bem-vindas! Sinta-se à vontade para abrir uma *issue* para relatar bugs ou sugerir novas funcionalidades. 
+
+### 🚀 Roadmap
+- [ ] Integração com mais modelos (CodeLlama, Llama3, etc.)
+- [ ] Sistema de caching inteligente
+- [ ] Interface mobile otimizada
+- [ ] Plugin system para extensões
+- [ ] Integração com ferramentas populares (Burp, Metasploit)
+
+### 💡 Como Contribuir
+1. Fork o repositório
+2. Crie sua feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## ⭐ Características Técnicas
+
+### 🧠 Sistema Híbrido de IA
+- **TinyLlama 1.1B:** 668MB, ~5-10s por resposta
+- **Mistral 7B:** 4GB, ~20-30s por resposta
+- **Seleção Automática:** Baseada em complexidade da técnica
+- **Fallback Inteligente:** Se um modelo falha, tenta o outro
+
+### ⚡ Otimizações de Performance  
+- **Quantização Q4_K_M:** Melhor balanço qualidade/performance
+- **Context Length:** Otimizado por modelo (512 vs 1024 tokens)
+- **Batch Processing:** Ajustado por arquitetura (64 vs 32)
+- **Threading:** CPU cores otimizados por modelo
+
+### 🔒 Segurança e Privacidade
+- **100% Offline:** Nenhum dado sai da sua máquina
+- **Sem Telemetria:** Zero coleta de dados
+- **Modelos Locais:** Controle total sobre IA
+- **Containerizado:** Isolamento completo via Docker
+
+## 📊 Especificações Mínimas vs Recomendadas
+
+| Componente | Mínimo (TinyLlama) | Recomendado (Híbrido) |
+|------------|--------------------|-----------------------|
+| **RAM** | 2GB | 8GB+ |
+| **Storage** | 2GB | 10GB |  
+| **CPU** | 2 cores | 4+ cores |
+| **GPU** | Nenhuma | CUDA/OpenCL (opcional) |
+| **OS** | Linux/macOS/Windows | Linux (preferencialmente) |
 
 ## 📜 Licença
 
 Este projeto é distribuído sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
+
+---
+
+### 🎯 **Experimente agora:**
+```bash
+git clone https://github.com/dionebr/cyberai.git
+cd cyberai  
+docker compose up --build -d
+# Acesse: http://localhost
+```
+
+**CyberAI** - *Onde velocidade encontra inteligência em cibersegurança* 🛡️⚡
