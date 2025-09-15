@@ -42,16 +42,25 @@
   <script>
     const apiDetect = window.detectApiBase();
     document.getElementById('reconForm').addEventListener('submit', async (e)=>{
-      e.preventDefault(); await apiDetect; const API_BASE = window.API_BASE;
+      e.preventDefault();
+      const API_BASE = await apiDetect;
       const fd=new FormData(e.target);
       const target=fd.get('target')||''; const ports=fd.get('ports')||''; const context=fd.get('context')||'';
       const prompt=`Gere um playbook de enumeração. Host: ${target}. Portas: ${ports}. Inclua Nmap agressivo, detecção de versão e scripts, varredura UDP, subdomínios e descoberta de diretórios.`;
-      const res = await fetch(`${API_BASE}/generate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt, technique:'recon', context, target})});
-      const data = await res.json();
-      const html = window.formatResponse(data.response || JSON.stringify(data));
+      
       const el = document.getElementById('reconOut');
-      el.innerHTML = html;
-      window.applyHighlight();
+      el.innerHTML = '<div class="text-blue-400">Gerando enumeração...</div>';
+      
+      try {
+        const res = await fetch(`${API_BASE}/generate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt, technique:'recon', context, target})});
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        const data = await res.json();
+        const html = window.formatResponse(data.response || JSON.stringify(data));
+        el.innerHTML = html;
+        window.applyHighlight();
+      } catch (error) {
+        el.innerHTML = `<div class="text-red-400">Erro: ${error.message}</div>`;
+      }
     });
   </script>
 </body>

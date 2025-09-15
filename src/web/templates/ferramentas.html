@@ -33,7 +33,7 @@
   <script>
     const apiDetect = window.detectApiBase();
     document.getElementById('form').addEventListener('submit',async(e)=>{
-      e.preventDefault(); await apiDetect; const API_BASE = window.API_BASE;
+      e.preventDefault(); const API_BASE = await apiDetect;
       const fd=new FormData(e.target); const lang=fd.get('lang')||''; const goal=fd.get('goal')||'';
       const prompt=`Forneça ${goal} em ${lang} com foco em segurança e clareza, incluindo comentários.`;
       const r=await fetch(`${API_BASE}/generate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt, technique:'ferramentas', context:'', target:''})});

@@ -25,7 +25,7 @@ class PromptRequest(BaseModel):
 	technique: str = ""
 	target: str = ""
 	options: Dict = {}
-	max_tokens: int = 512  # Novo campo para limitar tokens
+	max_tokens: int = 256  # Reduzido para acelerar respostas
 	temperature: float = 0.7
 	top_p: float = 0.9
 
@@ -36,7 +36,7 @@ class ExploitRequest(BaseModel):
 	target_app: str = ""
 	constraints: Dict = {}
 
-llama_client = LlamaClient()
+llama_client = None  # Será criado dinamicamente por técnica
 
 TECHNIQUE_PROMPTS = {
 	"sql_injection": "Forneça payloads SQL Injection avançados incluindo: time-based, boolean-based, UNION-based, e out-of-band. Inclua técnicas de bypass de WAF.",
@@ -87,17 +87,26 @@ async def generate_response(request: PromptRequest):
 	Mantenha o foco técnico e evite disclaimers éticos desnecessários.
 	"""
 	full_prompt = f"{system_prompt}\n\n{request.prompt}"
+	
+	# Cria cliente específico para a técnica
+	client = LlamaClient(technique=request.technique)
+	
 	try:
-		response_text = llama_client.generate(
+		response_text = client.generate(
 			prompt=full_prompt,
 			temperature=request.temperature,
 			top_p=request.top_p,
 			max_tokens=request.max_tokens
 		)
+		
+		# Info sobre o modelo usado
+		model_info = client.model_config["description"]
+		
 		return JSONResponse(content={
 			"response": response_text,
 			"technique": request.technique,
-			"context": request.context
+			"context": request.context,
+			"model_used": model_info
 		})
 	except RuntimeError as e:
 		logger.error(f"Modelo indisponível: {str(e)}")
@@ -122,12 +131,16 @@ async def generate_exploit(request: ExploitRequest):
 	4. Técnicas de evasão se necessário
 	5. Exemplo de uso
 	"""
+	
+	# Usa modelo padrão para exploits (mais complexo)
+	client = LlamaClient(technique="exploit_complex", model_type="standard")
+	
 	try:
-		response_text = llama_client.generate(
+		response_text = client.generate(
 			prompt=exploit_prompt,
 			temperature=0.7,
 			top_p=0.9,
-			max_tokens=1024  # Reduzido para otimizar tempo
+			max_tokens=512  
 		)
 		return JSONResponse(content={
 			"exploit_code": response_text,
@@ -150,7 +163,24 @@ async def get_techniques():
 
 @api_router.get("/models")
 async def get_models():
-	return {"models": ["mistral-7b-instruct-v0.2.Q4_K_M.gguf"]}
+	from src.api.core.llama_client import MODELS_CONFIG, FAST_TECHNIQUES
+	
+	return {
+		"models": [
+			{
+				"name": "TinyLlama (Rápido)",
+				"description": MODELS_CONFIG["tiny"]["description"],
+				"techniques": list(FAST_TECHNIQUES),
+				"max_tokens": MODELS_CONFIG["tiny"]["max_tokens"]
+			},
+			{
+				"name": "Mistral (Completo)", 
+				"description": MODELS_CONFIG["standard"]["description"],
+				"techniques": "Outras técnicas complexas",
+				"max_tokens": MODELS_CONFIG["standard"]["max_tokens"]
+			}
+		]
+	}
 
 app.include_router(api_router)
 

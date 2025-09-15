@@ -47,12 +47,36 @@
   <script>
     const apiDetect = window.detectApiBase();
     document.getElementById('plForm').addEventListener('submit', async (e)=>{
-      e.preventDefault(); await apiDetect; const API_BASE = window.API_BASE;
+      e.preventDefault(); 
+      const API_BASE = await apiDetect; // Aguardar a detecção da API
       const fd=new FormData(e.target);
-      const ip=fd.get('ip')||''; const port=fd.get('port')||'4444'; const platforms=fd.get('platforms')||'all';
+      const ip=fd.get('ip')||'127.0.0.1'; 
+      const port=fd.get('port')||'4444'; 
+      const platforms=fd.get('platforms')||'all';
       const prompt=`Crie reverse shells para ${ip}:${port}. Plataformas: ${platforms}. Inclua variações e dicas rápidas de evasão.`;
-      const res=await fetch(`${API_BASE}/generate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt, technique:'payloads', context:'', target:ip})});
-      const data=await res.json(); const html=window.formatResponse(data.response||JSON.stringify(data)); const el=document.getElementById('out'); el.innerHTML=html; window.applyHighlight();
+      
+      // Mostrar loading
+      const outputEl = document.getElementById('out');
+      outputEl.innerHTML = '<div class="text-blue-400">Gerando payloads...</div>';
+      
+      try {
+        const res=await fetch(`${API_BASE}/generate`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({prompt, technique:'payloads', context:'', target:ip})
+        });
+        
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        
+        const data=await res.json(); 
+        const html=window.formatResponse(data.response||JSON.stringify(data)); 
+        outputEl.innerHTML=html; 
+        window.applyHighlight();
+      } catch (error) {
+        outputEl.innerHTML = `<div class="text-red-400">Erro: ${error.message}</div>`;
+      }
     });
   </script>
 </body>

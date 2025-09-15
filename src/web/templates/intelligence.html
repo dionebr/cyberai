@@ -30,7 +30,7 @@
   <script>
     const apiDetect = window.detectApiBase();
     document.getElementById('form').addEventListener('submit',async(e)=>{
-      e.preventDefault(); await apiDetect; const API_BASE = window.API_BASE;
+      e.preventDefault(); const API_BASE = await apiDetect;
       const fd=new FormData(e.target); const topic=fd.get('topic')||'';
       const prompt=`Faça um briefing de Threat Intel sobre ${topic}, com CVEs/TTPs, mapeamento MITRE ATT&CK, recomendações e referências.`;
       const r=await fetch(`${API_BASE}/generate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt, technique:'intelligence', context:'', target:''})});

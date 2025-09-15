@@ -33,11 +33,24 @@
   <script>
     const apiDetect = window.detectApiBase();
     document.getElementById('form').addEventListener('submit',async (e)=>{
-      e.preventDefault(); await apiDetect; const API_BASE = window.API_BASE;
+      e.preventDefault(); 
+      const API_BASE = await apiDetect;
       const fd=new FormData(e.target); const file=fd.get('file')||''; const goal=fd.get('goal')||'';
       const prompt=`Elabore um plano de análise para ${file}. Objetivo: ${goal}. Inclua etapas no radare2/Ghidra e extração de IoCs.`;
-      const r=await fetch(`${API_BASE}/generate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt, technique:'binarios', context:'', target:file})});
-      const data=await r.json(); const html=window.formatResponse(data.response||JSON.stringify(data)); const el=document.getElementById('out'); el.innerHTML=html; window.applyHighlight();
+      
+      const el=document.getElementById('out');
+      el.innerHTML = '<div class="text-purple-400">Analisando binário...</div>';
+      
+      try {
+        const r=await fetch(`${API_BASE}/generate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt, technique:'binarios', context:'', target:file})});
+        if (!r.ok) throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+        const data=await r.json(); 
+        const html=window.formatResponse(data.response||JSON.stringify(data)); 
+        el.innerHTML=html; 
+        window.applyHighlight();
+      } catch (error) {
+        el.innerHTML = `<div class="text-red-400">Erro: ${error.message}</div>`;
+      }
     });
   </script>
 </body>

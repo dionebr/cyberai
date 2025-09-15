@@ -33,7 +33,7 @@
   <script>
     const apiDetect = window.detectApiBase();
     document.getElementById('form').addEventListener('submit',async(e)=>{
-      e.preventDefault(); await apiDetect; const API_BASE = window.API_BASE;
+      e.preventDefault(); const API_BASE = await apiDetect;
       const fd=new FormData(e.target); const targets=fd.get('targets')||''; const scope=fd.get('scope')||'';
       const prompt=`Elabore um plano de gestão do engajamento. Escopo: ${scope}. Alvos: ${targets}. Inclua cronograma, tarefas e métricas.`;
       const r=await fetch(`${API_BASE}/generate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt, technique:'gestao', context:'', target:targets})});

@@ -30,7 +30,7 @@
   <script>
     const apiDetect = window.detectApiBase();
     document.getElementById('form').addEventListener('submit',async(e)=>{
-      e.preventDefault(); await apiDetect; const API_BASE = window.API_BASE;
+      e.preventDefault(); const API_BASE = await apiDetect;
       const fd=new FormData(e.target); const goal=fd.get('goal')||'';
       const prompt=`Descreva um laboratório para ${goal}: VMs, redes, datasets e como executar cenários de prática.`;
       const r=await fetch(`${API_BASE}/generate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt, technique:'lab', context:'', target:''})});

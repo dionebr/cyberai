@@ -30,7 +30,7 @@
   <script>
     const apiDetect = window.detectApiBase();
     document.getElementById('form').addEventListener('submit',async(e)=>{
-      e.preventDefault(); await apiDetect; const API_BASE = window.API_BASE;
+      e.preventDefault(); const API_BASE = await apiDetect;
       const fd=new FormData(e.target); const context=fd.get('context')||'';
       const prompt=`Proponha a estrutura de um relatório técnico com: sumário executivo, metodologia, achados (evidências e risco), recomendações e próximos passos. Contexto: ${context}.`;
       const r=await fetch(`${API_BASE}/generate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt, technique:'relatorios', context, target:''})});
