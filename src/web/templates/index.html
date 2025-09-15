@@ -15,8 +15,23 @@
 </head>
 <body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col font-sans">
             <header class="p-4 border-b border-gray-800">
-                    <div class="max-w-6xl mx-auto flex items-center">
+                    <div class="max-w-6xl mx-auto flex items-center justify-between">
                         <h1 class="text-2xl font-extrabold tracking-tight text-green-400">CYBERAI</h1>
+                        
+                        <!-- Seletor de Modelo LLM -->
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-2">
+                                <div id="connectionStatus" class="w-2 h-2 rounded-full bg-gray-500 transition-colors"></div>
+                                <span class="text-xs text-gray-400" id="connectionText">Desconectado</span>
+                            </div>
+                            <div class="relative">
+                                <select id="modelSelector" class="bg-gray-800 border border-gray-700 rounded-lg px-3 py-1 text-sm text-gray-200 focus:border-green-500 focus:outline-none">
+                                    <option value="auto">🤖 Auto (Híbrido)</option>
+                                    <option value="tinyllama">⚡ TinyLlama (Rápido)</option>
+                                    <option value="mistral">🧠 Mistral (Completo)</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
             </header>
 
@@ -171,6 +186,47 @@
         }
     }
 
+    function addThinkingMessage() {
+        const wrap = document.createElement('div');
+        wrap.className = 'p-2 rounded bg-gray-800';
+        wrap.innerHTML = `
+            <strong class="text-green-300">CyberAI:</strong> 
+            <span class="inline-flex items-center gap-2">
+                <div class="flex space-x-1">
+                    <div class="w-2 h-2 bg-green-400 rounded-full animate-bounce"></div>
+                    <div class="w-2 h-2 bg-green-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                    <div class="w-2 h-2 bg-green-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                </div>
+                <span class="text-gray-400">Pensando...</span>
+            </span>
+        `;
+        const box = document.getElementById('chatMessages');
+        box.appendChild(wrap);
+        box.scrollTop = box.scrollHeight;
+        return wrap;
+    }
+
+    function removeThinkingMessage(element) {
+        if (element && element.parentNode) {
+            element.parentNode.removeChild(element);
+        }
+    }
+
+    function updateConnectionStatus(connected, modelInfo = '') {
+        const statusDot = document.getElementById('connectionStatus');
+        const statusText = document.getElementById('connectionText');
+        
+        if (connected) {
+            statusDot.className = 'w-2 h-2 rounded-full bg-green-500 transition-colors';
+            statusText.textContent = modelInfo || 'Conectado';
+            statusText.className = 'text-xs text-green-400';
+        } else {
+            statusDot.className = 'w-2 h-2 rounded-full bg-red-500 transition-colors';
+            statusText.textContent = 'Desconectado';
+            statusText.className = 'text-xs text-red-400';
+        }
+    }
+
     function insertPayload(type) {
         document.getElementById('userInput').value = PAYLOADS[type] || '';
     }
@@ -191,16 +247,37 @@
     async function sendMessage() {
         const message = document.getElementById('userInput').value.trim();
         if (!message) return;
+        
         addMessage('user', message);
         document.getElementById('userInput').value = '';
+        
+        // Adicionar indicador de "Pensando..."
+        const thinkingMessage = addThinkingMessage();
 
         try {
             const apiBase = await apiDetectPromise;
+            const selectedModel = document.getElementById('modelSelector').value;
+            
+            // Determinar o modelo para requisição
+            let modelHint = '';
+            if (selectedModel === 'tinyllama') modelHint = 'fast';
+            else if (selectedModel === 'mistral') modelHint = 'complex';
+            
             const res = await fetch(`${apiBase}/generate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: message, technique: '', context: '', target: '' })
+                body: JSON.stringify({ 
+                    prompt: message, 
+                    technique: '', 
+                    context: '', 
+                    target: '',
+                    preferred_model: selectedModel
+                })
             });
+            
+            // Remover indicador de "Pensando..."
+            removeThinkingMessage(thinkingMessage);
+            
             if (!res.ok) {
                 let detail = '';
                 try { const err = await res.json(); detail = err.detail || ''; } catch {}
@@ -214,6 +291,8 @@
             const data = await res.json();
             addMessage('bot', data.response || 'Sem resposta.');
         } catch (err) {
+            // Remover indicador de "Pensando..." em caso de erro
+            removeThinkingMessage(thinkingMessage);
             addMessage('bot', 'Erro ao comunicar com a API.');
             console.error(err);
         }
@@ -227,6 +306,36 @@
                     e.preventDefault();
                     sendMessage();
                 }
+            });
+
+            // Verificação inicial de conexão
+            async function checkConnection() {
+                try {
+                    const apiBase = await apiDetectPromise;
+                    const response = await fetch(`${apiBase}/techniques`, { method: 'GET' });
+                    if (response.ok) {
+                        updateConnectionStatus(true, 'Sistema Híbrido');
+                    } else {
+                        updateConnectionStatus(false);
+                    }
+                } catch (error) {
+                    updateConnectionStatus(false);
+                }
+            }
+
+            // Verificar conexão ao carregar a página
+            document.addEventListener('DOMContentLoaded', checkConnection);
+            
+            // Atualizar status quando modelo for alterado
+            document.getElementById('modelSelector').addEventListener('change', function() {
+                const selectedModel = this.value;
+                let modelName = '';
+                switch(selectedModel) {
+                    case 'tinyllama': modelName = 'TinyLlama (Rápido)'; break;
+                    case 'mistral': modelName = 'Mistral (Completo)'; break;
+                    default: modelName = 'Sistema Híbrido'; break;
+                }
+                updateConnectionStatus(true, modelName);
             });
     </script>
 </body>

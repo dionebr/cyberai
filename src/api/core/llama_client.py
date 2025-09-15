@@ -4,18 +4,18 @@ import os
 MODELS_CONFIG = {
     "tiny": {
         "path": os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../models/tinyllama-1.1b-chat-v0.3.Q4_K_M.gguf')),
-        "n_ctx": 512,
+        "n_ctx": 768,
         "n_threads": 8, 
         "n_batch": 64,
-        "max_tokens": 128,
+        "max_tokens": 256,
         "description": "Modelo rápido para tarefas simples (600MB)"
     },
     "standard": {
         "path": os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../models/mistral-7b-instruct-v0.2.Q4_K_M.gguf')),
-        "n_ctx": 1024,
+        "n_ctx": 2048,
         "n_threads": 4,
         "n_batch": 32, 
-        "max_tokens": 256,
+        "max_tokens": 768,
         "description": "Modelo completo para tarefas complexas (4GB)"
     }
 }
@@ -76,6 +76,9 @@ class LlamaClient:
         # Template para TinyLlama (ChatML format)
         if "tinyllama" in self.model_config["path"]:
             formatted_prompt = f"<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n"
+        # Template para Mistral (Instruct format)
+        elif "mistral" in self.model_config["path"]:
+            formatted_prompt = f"<s>[INST] {prompt} [/INST]"
         else:
             formatted_prompt = prompt
             
@@ -84,6 +87,6 @@ class LlamaClient:
             max_tokens=max_tokens,
             temperature=temperature,
             top_p=top_p,
-            stop=["<|im_end|>", "</s>", "\n\n"] if "tinyllama" in self.model_config["path"] else ["<|end|>", "\n\n"]
+            stop=["<|im_end|>", "</s>", "\n\n"] if "tinyllama" in self.model_config["path"] else ["</s>", "[/INST]", "\n\n"]
         )
         return output["choices"][0]["text"].strip()

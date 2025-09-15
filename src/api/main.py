@@ -25,9 +25,10 @@ class PromptRequest(BaseModel):
 	technique: str = ""
 	target: str = ""
 	options: Dict = {}
-	max_tokens: int = 256  # Reduzido para acelerar respostas
+	max_tokens: int = 768  # Aumentado para respostas mais completas
 	temperature: float = 0.7
 	top_p: float = 0.9
+	preferred_model: str = "auto"  # "auto", "tinyllama", "mistral"
 
 class ExploitRequest(BaseModel):
 	cve: str = ""
@@ -51,7 +52,7 @@ TECHNIQUE_PROMPTS = {
 	"memory_analysis": "Técnicas de análise de memória e dumping de credenciais.",
 	# Telas/módulos (aliases em pt-br)
 	"recon": "Enumeração e reconhecimento: nmap agressivo, detecção de serviços/ports, subdomínios (amass/subfinder), tecnologias (fingerprinting) e descoberta de diretórios (gobuster/feroxbuster). Entregue comandos práticos e anotações.",
-	"payloads": "Geração de payloads e reverse shells multi-plataforma (Bash, Python, PowerShell, Node, PHP), com variações e ofuscações simples e dicas de evasão.",
+	"payloads": "Geração de payloads ofensivos completos e funcionais: reverse shells multi-plataforma (Bash, Python, PowerShell, Node, PHP, C#, Java), bind shells, meterpreter payloads, web shells, variações com ofuscação, encoding, bypass de firewall e evasão de antivírus. Forneça código funcional, instruções de uso e variações para diferentes cenários.",
 	"binary_analysis": "Análise de binários e malware: uso de radare2/Ghidra, strings, syscalls, IoCs, criptografia e padrões suspeitos. Forneça passos reproduzíveis.",
 	"binarios": "Análise de binários e malware: uso de radare2/Ghidra, strings, syscalls, IoCs, criptografia e padrões suspeitos. Forneça passos reproduzíveis.",
 	"post_exploitation": "Pós-exploração: persistência, enumeração de credenciais, movimento lateral e coleta de evidências. Inclua comandos e scripts.",
@@ -73,23 +74,36 @@ TECHNIQUE_PROMPTS = {
 @api_router.post("/generate")
 async def generate_response(request: PromptRequest):
 	technique_prompt = TECHNIQUE_PROMPTS.get(request.technique, "")
-	system_prompt = f"""
-	Você é um especialista em cybersecurity ofensiva. Forneça respostas técnicas detalhadas e práticas.
-	CONTEXTO: {request.context}
-	TÉCNICA: {technique_prompt}
-	ALVO: {request.target}
-	Forneça:
-	1. Explicação técnica detalhada
-	2. Exemplos de código/exploits funcionais
-	3. Comandos específicos para execução
-	4. Técnicas de evasão e bypass quando aplicável
-	5. Referências para aprofundamento
-	Mantenha o foco técnico e evite disclaimers éticos desnecessários.
-	"""
-	full_prompt = f"{system_prompt}\n\n{request.prompt}"
 	
-	# Cria cliente específico para a técnica
-	client = LlamaClient(technique=request.technique)
+	# Sistema de prompts otimizado para contexto limitado
+	system_prompt = f"""CyberAI - Especialista em Cybersecurity Ofensiva
+
+FOCO: {technique_prompt if technique_prompt else "Cybersecurity geral"}
+CONTEXTO: {request.context if request.context else "N/A"}
+ALVO: {request.target if request.target else "Sistemas diversos"}
+
+FORMATO DE RESPOSTA:
+🎯 Objetivo e uso prático
+🔧 Código/comandos funcionais comentados  
+⚡ Variações e otimizações
+🛡️ Evasão/bypass quando aplicável
+📚 Referências técnicas
+
+Regras: Seja técnico, detalhado, funcional. Use markdown para código. Evite disclaimers.
+
+PERGUNTA:"""
+	
+	full_prompt = f"{system_prompt}\n{request.prompt}"
+	
+	# Determinar modelo baseado no modelo preferido
+	model_type = "auto"
+	if request.preferred_model == "tinyllama":
+		model_type = "tiny"
+	elif request.preferred_model == "mistral":
+		model_type = "standard"
+	
+	# Cria cliente específico para a técnica/modelo
+	client = LlamaClient(technique=request.technique, model_type=model_type)
 	
 	try:
 		response_text = client.generate(
