@@ -13,6 +13,20 @@ docker-compose up --build -d
 - Navegador: http://localhost
 - A API é acessada via proxy em `/api` (ex: http://localhost/api/generate)
 
+Telas dos módulos (links diretos no topo):
+- Reconhecimento: /recon.html
+- Payloads: /payloads.html
+- Análise de Binários: /binarios.html
+- Exploração: /exploit.html
+- Pós-Exploração: /post.html
+- Treinamento: /treinamento.html
+- Relatórios: /relatorios.html
+- Gestão: /gestao.html
+- Dev Tools: /ferramentas.html
+- Threat Intel: /intelligence.html
+- Laboratório: /lab.html
+- Comunidade: /community.html
+
 3) Logs (opcional)
 ```bash
 docker-compose logs -f --tail=200
@@ -33,6 +47,7 @@ bash src/scripts/start.sh
 3) Interface Web
 - Via Nginx (Docker): http://localhost
 - Ou abra diretamente o arquivo: `src/web/templates/index.html`
+ - Dica: se abrir por servidor simples (ex: `python3 -m http.server`), o frontend detecta a API e usa `http://localhost:8000` automaticamente se `/api` não existir.
 
 ## Endpoints principais
 - POST /api/generate — Gera resposta técnica do LLM
@@ -52,4 +67,4 @@ curl -X POST http://localhost/api/generate \
 	- Rode o download do modelo: `bash src/scripts/download-model.sh`
 	- Verifique se `llama-cpp-python` está instalado (requirements.txt)
 - CORS/Portas
-	- A interface usa `/api`. Certifique-se de acessar via http://localhost com o Nginx do Docker.
+	- A interface tenta `/api` e faz fallback automático para `http://localhost:8000` quando necessário. Prefira acessar via http://localhost com o Nginx do Docker para servir assets estáticos.

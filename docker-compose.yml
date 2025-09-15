@@ -1,19 +1,18 @@
-version: '3.8'
 services:
   api:
-    build: .
-    ports:
-      - "8000:8000"
+    build:
+      context: .
+      network: host
+    network_mode: host
     volumes:
       - .:/app
     restart: always
   web:
     image: nginx:alpine
-    ports:
-      - "80:80"
+    network_mode: host
     volumes:
       - ./src/web/templates:/usr/share/nginx/html
       - ./src/web/static:/usr/share/nginx/html/static
-      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./config/nginx/nginx.conf:/etc/nginx/conf.d/cyberai.conf
     depends_on:
       - api

@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom utilities */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.bg-hacker { background-color: #0a0a0a; }
+.border-hacker { border-color: #00ff00; }
+.terminal-font { font-family: 'Courier New', monospace; }
+.text-green-400 { color: #00ff00; }
+:root { --term-bg: #0b0f10; --term-fg: #cbd5e1; }
+.terminal { background: var(--term-bg); color: var(--term-fg); }
+.terminal .prompt { color: #22d3ee; }
+.terminal .output { color: #a3a3a3; }

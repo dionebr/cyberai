@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dev Tools | CyberAI</title>
+  <link id="tw" rel="stylesheet" href="/static/css/dist.css" onerror="(function(){var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';document.head.appendChild(s);})();">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="/static/js/utils.js"></script>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen">
+  <header class="p-4 border-b border-gray-800">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <h1 class="text-xl font-extrabold text-lime-400">Dev Tools</h1>
+  <a href="index.html" class="text-sm text-gray-400 hover:text-gray-200">Voltar</a>
+    </div>
+  </header>
+  <main class="max-w-6xl mx-auto p-4 space-y-6">
+    <section class="bg-gray-900 border border-gray-800 rounded p-4">
+      <form id="form" class="grid sm:grid-cols-2 gap-3">
+        <label class="text-sm text-gray-300">Linguagem
+          <input name="lang" class="w-full mt-1 rounded bg-gray-950 border border-gray-800 p-2" placeholder="Python, Bash..." />
+        </label>
+        <label class="text-sm text-gray-300">Objetivo
+          <input name="goal" class="w-full mt-1 rounded bg-gray-950 border border-gray-800 p-2" placeholder="Template ou snippet" />
+        </label>
+        <div class="sm:col-span-2"><button class="px-3 py-2 rounded bg-lime-600 hover:bg-lime-700">Gerar</button></div>
+      </form>
+    </section>
+  <section class="bg-gray-900 border border-gray-800 rounded p-4"><div id="out" class="text-sm whitespace-pre-wrap space-y-2"></div></section>
+  </main>
+  <script>
+    const apiDetect = window.detectApiBase();
+    document.getElementById('form').addEventListener('submit',async(e)=>{
+      e.preventDefault(); await apiDetect; const API_BASE = window.API_BASE;
+      const fd=new FormData(e.target); const lang=fd.get('lang')||''; const goal=fd.get('goal')||'';
+      const prompt=`Forneça ${goal} em ${lang} com foco em segurança e clareza, incluindo comentários.`;
+      const r=await fetch(`${API_BASE}/generate`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt, technique:'ferramentas', context:'', target:''})});
+      const data=await r.json(); const el=document.getElementById('out');
+      el.innerHTML=window.formatResponse(data.response||JSON.stringify(data)); window.applyHighlight();
+    });
+  </script>
+</body>
+</html>

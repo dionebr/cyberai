@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import logging
@@ -46,7 +47,26 @@ TECHNIQUE_PROMPTS = {
 	"privesc": "Técnicas de privilege escalation para Linux e Windows incluindo kernel exploits, misconfigurations e abuso de serviços.",
 	"pivoting": "Técnicas de pivoting e movimento lateral em redes.",
 	"antivirus_evasion": "Técnicas de evasão de antivírus e EDR solutions.",
-	"memory_analysis": "Técnicas de análise de memória e dumping de credenciais."
+	"memory_analysis": "Técnicas de análise de memória e dumping de credenciais.",
+	# Telas/módulos (aliases em pt-br)
+	"recon": "Enumeração e reconhecimento: nmap agressivo, detecção de serviços/ports, subdomínios (amass/subfinder), tecnologias (fingerprinting) e descoberta de diretórios (gobuster/feroxbuster). Entregue comandos práticos e anotações.",
+	"payloads": "Geração de payloads e reverse shells multi-plataforma (Bash, Python, PowerShell, Node, PHP), com variações e ofuscações simples e dicas de evasão.",
+	"binary_analysis": "Análise de binários e malware: uso de radare2/Ghidra, strings, syscalls, IoCs, criptografia e padrões suspeitos. Forneça passos reproduzíveis.",
+	"binarios": "Análise de binários e malware: uso de radare2/Ghidra, strings, syscalls, IoCs, criptografia e padrões suspeitos. Forneça passos reproduzíveis.",
+	"post_exploitation": "Pós-exploração: persistência, enumeração de credenciais, movimento lateral e coleta de evidências. Inclua comandos e scripts.",
+	"post": "Pós-exploração: persistência, enumeração de credenciais, movimento lateral e coleta de evidências. Inclua comandos e scripts.",
+	"reporting": "Geração de relatórios técnicos: sumário executivo, metodologia, achados com evidências, risco, recomendação e próximos passos.",
+	"relatorios": "Geração de relatórios técnicos: sumário executivo, metodologia, achados com evidências, risco, recomendação e próximos passos.",
+	"management": "Gestão de engajamento: definição de escopo, alvos, métricas e tarefas; checklists e cronograma de execução.",
+	"gestao": "Gestão de engajamento: definição de escopo, alvos, métricas e tarefas; checklists e cronograma de execução.",
+	"dev_tools": "Assistentes de desenvolvimento: templates de código, snippets seguros, boas práticas e exemplos de integração.",
+	"ferramentas": "Assistentes de desenvolvimento: templates de código, snippets seguros, boas práticas e exemplos de integração.",
+	"threat_intel": "Threat Intelligence: sumarize CVEs/TTPs relevantes, mapeie em MITRE ATT&CK, indique referências e indicadores.",
+	"intelligence": "Threat Intelligence: sumarize CVEs/TTPs relevantes, mapeie em MITRE ATT&CK, indique referências e indicadores.",
+	"lab": "Laboratório: plano de montagem de ambiente de testes isolado, VMs necessárias, redes e datasets de prática.",
+	"community": "Comunidade: plugins, integrações e recursos compartilhados. Sugira ideias e exemplos de como estender a plataforma.",
+	"exploit": "Exploração automatizada: identificar vetores plausíveis e gerar PoCs, com recomendações de ferramentas e passos de validação."
+    ,"treinamento": "Trilhas de estudo e prática: CTFs, labs e materiais progressivos focados no objetivo informado. Estruture por níveis e inclua referências."
 }
 
 @app.post("/generate")
@@ -73,11 +93,11 @@ async def generate_response(request: PromptRequest):
 			top_p=request.top_p,
 			max_tokens=request.max_tokens
 		)
-		return {
+		return JSONResponse(content={
 			"response": response_text,
 			"technique": request.technique,
 			"context": request.context
-		}
+		})
 	except RuntimeError as e:
 		logger.error(f"Modelo indisponível: {str(e)}")
 		raise HTTPException(status_code=503, detail=str(e))
@@ -108,14 +128,14 @@ async def generate_exploit(request: ExploitRequest):
 			top_p=0.9,
 			max_tokens=1024  # Reduzido para otimizar tempo
 		)
-		return {
+		return JSONResponse(content={
 			"exploit_code": response_text,
 			"metadata": {
 				"cve": request.cve,
 				"target_os": request.target_os,
 				"target_app": request.target_app
 			}
-		}
+		})
 	except RuntimeError as e:
 		logger.error(f"Modelo indisponível: {str(e)}")
 		raise HTTPException(status_code=503, detail=str(e))

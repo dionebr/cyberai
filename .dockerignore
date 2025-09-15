@@ -1,0 +1,40 @@
+# Python venvs
+.venv/
+venv/
+
+# Node
+node_modules/
+
+# Git
+.git/
+.gitignore
+
+# Docker
+.dockerignore
+
+# Models and large artifacts
+models/**/*.gguf
+models/*.gguf
+models/
+backups/
+
+# Data and logs
+/data/logs/
+/data/sessions/
+/data/exploits/
+
+# Bytecode and cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pytest_cache/
+.mypy_cache/
+
+# Editor/IDE
+.vscode/
+.idea/
+
+# Misc
+*.log
+.DS_Store

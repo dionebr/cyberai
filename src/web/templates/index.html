@@ -4,14 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CyberAI Offensive Suite</title>
-    <link rel="stylesheet" href="/static/css/main.css" />
-    <link rel="stylesheet" href="/static/css/terminal.css" />
-    <!-- DEV ONLY: Tailwind CDN. Em produção, use build local -->
+    <!-- CSS: tenta arquivo compilado; cai para CDN em dev simples -->
+    <link id="tw" rel="stylesheet" href="/static/css/dist.css" onerror="(function(){var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';document.head.appendChild(s);})();">
+    <!-- DEV ONLY: Tailwind CDN como fallback -->
         <!-- Fonts: Inter (sans) e JetBrains Mono (mono) -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    
         <script>
             tailwind.config = {
                 theme: {
@@ -33,60 +33,56 @@
             </header>
 
     <main class="max-w-6xl mx-auto px-4 py-5 flex-1">
-        <!-- Grid de módulos -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-0" id="modules">
-            <button class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-green-600" onclick="showModule('recon')">
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-0" id="modules">
+            <a class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-green-600 block" href="recon.html">
                 <h3 class="text-green-400 font-semibold mb-1">Reconhecimento</h3>
                 <p class="text-xs text-gray-400">Nmap, subdomínios, tecnologias e diretórios.</p>
-            </button>
-            <button class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-blue-600" onclick="showModule('payloads')">
+            </a>
+            <a class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-blue-600 block" href="payloads.html">
                 <h3 class="text-blue-400 font-semibold mb-1">Payloads</h3>
                 <p class="text-xs text-gray-400">Reverse shells, EDR bypass, stagers e crypters.</p>
-            </button>
-            <button class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-purple-600" onclick="showModule('binarios')">
+            </a>
+            <a class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-purple-600 block" href="binarios.html">
                 <h3 class="text-purple-400 font-semibold mb-1">Análise de Binários</h3>
                 <p class="text-xs text-gray-400">RE, malware, shellcode e debugging.</p>
-            </button>
-            <button class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-red-600" onclick="showModule('exploit')">
+            </a>
+            <a class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-red-600 block" href="exploit.html">
                 <h3 class="text-red-400 font-semibold mb-1">Exploração</h3>
                 <p class="text-xs text-gray-400">Geração e teste de exploits e CVEs.</p>
-            </button>
-            <button class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-yellow-600" onclick="showModule('post')">
+            </a>
+            <a class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-yellow-600 block" href="post.html">
                 <h3 class="text-yellow-400 font-semibold mb-1">Pós-Exploração</h3>
                 <p class="text-xs text-gray-400">Persistência, movimento lateral e coleta.</p>
-            </button>
-            <button class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-pink-600" onclick="showModule('treinamento')">
+            </a>
+            <a class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-pink-600 block" href="treinamento.html">
                 <h3 class="text-pink-400 font-semibold mb-1">Treinamento</h3>
                 <p class="text-xs text-gray-400">CTFs, labs e guided learning.</p>
-            </button>
-            <button class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-cyan-600" onclick="showModule('relatorios')">
+            </a>
+            <a class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-cyan-600 block" href="relatorios.html">
                 <h3 class="text-cyan-400 font-semibold mb-1">Relatórios</h3>
                 <p class="text-xs text-gray-400">Templates, evidências e exportação.</p>
-            </button>
-            <button class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-orange-600" onclick="showModule('gestao')">
+            </a>
+            <a class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-orange-600 block" href="gestao.html">
                 <h3 class="text-orange-400 font-semibold mb-1">Gestão</h3>
                 <p class="text-xs text-gray-400">Alvos, escopo, métricas e tarefas.</p>
-            </button>
-            <button class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-lime-600" onclick="showModule('ferramentas')">
+            </a>
+            <a class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-lime-600 block" href="ferramentas.html">
                 <h3 class="text-lime-400 font-semibold mb-1">Dev Tools</h3>
                 <p class="text-xs text-gray-400">Templates e assistentes para código.</p>
-            </button>
-            <button class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-teal-600" onclick="showModule('intelligence')">
+            </a>
+            <a class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-teal-600 block" href="intelligence.html">
                 <h3 class="text-teal-400 font-semibold mb-1">Threat Intel</h3>
                 <p class="text-xs text-gray-400">Feeds, TTPs e alertas.</p>
-            </button>
-            <button class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-fuchsia-600" onclick="showModule('lab')">
+            </a>
+            <a class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-fuchsia-600 block" href="lab.html">
                 <h3 class="text-fuchsia-400 font-semibold mb-1">Laboratório</h3>
                 <p class="text-xs text-gray-400">Ambiente seguro para testes.</p>
-            </button>
-            <button class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-gray-600" onclick="showModule('community')">
+            </a>
+            <a class="bg-gray-900 border border-gray-800 rounded p-4 text-left hover:border-gray-600 block" href="community.html">
                 <h3 class="text-gray-300 font-semibold mb-1">Comunidade</h3>
                 <p class="text-xs text-gray-400">Plugins e colaboração.</p>
-            </button>
+            </a>
         </section>
-
-        <!-- Área dinâmica de conteúdo -->
-        <section id="module-content" class="mt-6"></section>
     </main>
 
             <!-- Botão flutuante do chat -->
@@ -161,8 +157,37 @@
 
     <script>
     // Config
-    // Autodetecta: quando servido via HTTP(S), usa /api (Nginx proxy); se abrir via file://, usa localhost:8000
-    const API_BASE = (location.origin.startsWith('http')) ? '/api' : 'http://localhost:8000';
+    // Autodetecção resiliente da API: tenta /api (via Nginx) e faz fallback para localhost:8000 quando necessário.
+    let API_BASE = null;
+    async function detectApiBase() {
+        const candidates = [];
+        if (location.origin.startsWith('http')) {
+            // Primeiro tenta o proxy do Nginx no mesmo host
+            candidates.push('/api');
+            // Depois tenta a porta padrão da API diretamente
+            candidates.push(`${location.protocol}//${location.hostname}:8000`);
+            // E por fim 127.0.0.1
+            candidates.push('http://127.0.0.1:8000');
+        } else {
+            candidates.push('http://localhost:8000');
+            candidates.push('http://127.0.0.1:8000');
+        }
+        for (const base of candidates) {
+            try {
+                const r = await fetch(`${base}/techniques`, { method: 'GET' });
+                if (r.ok) { API_BASE = base; break; }
+            } catch (_) { /* tenta próximo */ }
+        }
+        if (!API_BASE) {
+            // Último recurso
+            API_BASE = 'http://localhost:8000';
+        }
+        return API_BASE;
+    }
+    // Dispara detecção imediatamente e mantém a promise para reutilizar
+    const apiDetectPromise = detectApiBase();
+
+    // CSS inline já cobre estilos necessários, então não precisamos de fallback de arquivos.
     const PAYLOADS = {
         nmap: 'Gere um comando Nmap agressivo com detecção de versão e scripts. Alvo: 10.10.11.123',
         reverse_shell: 'Crie reverse shells em Bash, Python, PowerShell e Node para 10.10.11.123:4444',
@@ -194,124 +219,7 @@
                 if (wasHidden) setTimeout(() => document.getElementById('userInput')?.focus(), 150);
             }
 
-    // Router de módulos (placeholder)
-    function showModule(module) {
-        const content = document.getElementById('module-content');
-        const blocks = {
-            recon: `
-                <div class="bg-gray-900 rounded p-4 border border-gray-800">
-                    <h2 class="text-green-400 text-xl font-bold mb-2">Módulo de Reconhecimento</h2>
-                    <ul class="list-disc ml-6 text-gray-300 text-sm mb-3">
-                        <li>Nmap custom</li>
-                        <li>Subdomínios (amass/subfinder)</li>
-                        <li>Wappalyzer-like</li>
-                        <li>Gobuster/dirbuster</li>
-                    </ul>
-                    <button class="bg-green-600 hover:bg-green-700 rounded px-3 py-1">Abrir Módulo</button>
-                </div>`,
-            payloads: `
-                <div class="bg-gray-900 rounded p-4 border border-gray-800">
-                    <h2 class="text-blue-400 text-xl font-bold mb-2">Payloads Avançados</h2>
-                    <ul class="list-disc ml-6 text-gray-300 text-sm mb-3">
-                        <li>Reverse shells polimórficos</li>
-                        <li>Bypass AV/EDR</li>
-                        <li>Stagers para C2</li>
-                    </ul>
-                    <button class="bg-blue-600 hover:bg-blue-700 rounded px-3 py-1">Abrir Módulo</button>
-                </div>`,
-            binarios: `
-                <div class="bg-gray-900 rounded p-4 border border-gray-800">
-                    <h2 class="text-purple-400 text-xl font-bold mb-2">Análise de Binários</h2>
-                    <ul class="list-disc ml-6 text-gray-300 text-sm mb-3">
-                        <li>radare2/Ghidra</li>
-                        <li>Malware/IOC</li>
-                        <li>Shellcode</li>
-                    </ul>
-                    <button class="bg-purple-600 hover:bg-purple-700 rounded px-3 py-1">Abrir Módulo</button>
-                </div>`,
-            exploit: `
-                <div class="bg-gray-900 rounded p-4 border border-gray-800">
-                    <h2 class="text-red-400 text-xl font-bold mb-2">Exploração Automatizada</h2>
-                    <ul class="list-disc ml-6 text-gray-300 text-sm mb-3">
-                        <li>Sugestão de vulnerabilidades</li>
-                        <li>Geração de exploits</li>
-                        <li>Integração com ferramentas</li>
-                    </ul>
-                    <button class="bg-red-600 hover:bg-red-700 rounded px-3 py-1">Abrir Módulo</button>
-                </div>`,
-            post: `
-                <div class="bg-gray-900 rounded p-4 border border-gray-800">
-                    <h2 class="text-yellow-400 text-xl font-bold mb-2">Pós-Exploração</h2>
-                    <ul class="list-disc ml-6 text-gray-300 text-sm mb-3">
-                        <li>Persistência</li>
-                        <li>Lateral movement</li>
-                        <li>Dumping de credenciais</li>
-                    </ul>
-                    <button class="bg-yellow-600 hover:bg-yellow-700 rounded px-3 py-1">Abrir Módulo</button>
-                </div>`,
-            treinamento: `
-                <div class="bg-gray-900 rounded p-4 border border-gray-800">
-                    <h2 class="text-pink-400 text-xl font-bold mb-2">Treinamento</h2>
-                    <ul class="list-disc ml-6 text-gray-300 text-sm mb-3">
-                        <li>CTFs</li>
-                        <li>Labs</li>
-                        <li>Guided learning</li>
-                    </ul>
-                    <button class="bg-pink-600 hover:bg-pink-700 rounded px-3 py-1">Abrir Módulo</button>
-                </div>`,
-            relatorios: `
-                <div class="bg-gray-900 rounded p-4 border border-gray-800">
-                    <h2 class="text-cyan-400 text-xl font-bold mb-2">Relatórios</h2>
-                    <ul class="list-disc ml-6 text-gray-300 text-sm mb-3">
-                        <li>Templates</li>
-                        <li>Exportação</li>
-                        <li>Evidências</li>
-                    </ul>
-                    <button class="bg-cyan-600 hover:bg-cyan-700 rounded px-3 py-1">Abrir Módulo</button>
-                </div>`,
-            gestao: `
-                <div class="bg-gray-900 rounded p-4 border border-gray-800">
-                    <h2 class="text-orange-400 text-xl font-bold mb-2">Gestão</h2>
-                    <ul class="list-disc ml-6 text-gray-300 text-sm mb-3">
-                        <li>Alvos e escopo</li>
-                        <li>Métricas</li>
-                        <li>Tarefas</li>
-                    </ul>
-                    <button class="bg-orange-600 hover:bg-orange-700 rounded px-3 py-1">Abrir Módulo</button>
-                </div>`,
-            ferramentas: `
-                <div class="bg-gray-900 rounded p-4 border border-gray-800">
-                    <h2 class="text-lime-400 text-xl font-bold mb-2">Dev Tools</h2>
-                    <ul class="list-disc ml-6 text-gray-300 text-sm mb-3">
-                        <li>Templates</li>
-                        <li>Assistentes</li>
-                        <li>APIs</li>
-                    </ul>
-                    <button class="bg-lime-600 hover:bg-lime-700 rounded px-3 py-1">Abrir Módulo</button>
-                </div>`,
-            intelligence: `
-                <div class="bg-gray-900 rounded p-4 border border-gray-800">
-                    <h2 class="text-teal-400 text-xl font-bold mb-2">Threat Intelligence</h2>
-                    <ul class="list-disc ml-6 text-gray-300 text-sm mb-3">
-                        <li>Feeds e CVEs</li>
-                        <li>TTPs</li>
-                        <li>Alertas</li>
-                    </ul>
-                    <button class="bg-teal-600 hover:bg-teal-700 rounded px-3 py-1">Abrir Módulo</button>
-                </div>`,
-            lab: `
-                <div class="bg-gray-900 rounded p-4 border border-gray-800">
-                    <h2 class="text-fuchsia-400 text-xl font-bold mb-2">Laboratório Virtual</h2>
-                    <ul class="list-disc ml-6 text-gray-300 text-sm mb-3">
-                        <li>Ambientes isolados</li>
-                        <li>Máquinas vulneráveis</li>
-                        <li>Sandbox</li>
-                    </ul>
-                    <button class="bg-fuchsia-600 hover:bg-fuchsia-700 rounded px-3 py-1">Abrir Módulo</button>
-                </div>`
-        };
-        content.innerHTML = blocks[module] || '';
-    }
+    // Navegação direta: os cards já são links para as páginas dos módulos.
 
     // Chat simple
     async function sendMessage() {
@@ -321,6 +229,7 @@
         document.getElementById('userInput').value = '';
 
         try {
+            await apiDetectPromise;
             const res = await fetch(`${API_BASE}/generate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -338,6 +247,7 @@
             }
             const data = await res.json();
             addMessage('bot', data.response || 'Sem resposta.');
+            // Opcional: destacar code fences se presentes (não convertemos pra <pre><code> aqui para manter simplicidade)
         } catch (err) {
             addMessage('bot', 'Erro ao comunicar com a API.');
             console.error(err);
