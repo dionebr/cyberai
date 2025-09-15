@@ -5,25 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CyberAI Offensive Suite</title>
     <!-- CSS: tenta arquivo compilado; cai para CDN em dev simples -->
-    <link id="tw" rel="stylesheet" href="/static/css/dist.css" onerror="(function(){var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';document.head.appendChild(s);})();">
+    <link id="tw" rel="stylesheet" href="/static/css/dist.css">
     <!-- DEV ONLY: Tailwind CDN como fallback -->
         <!-- Fonts: Inter (sans) e JetBrains Mono (mono) -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     
-        <script>
-            tailwind.config = {
-                theme: {
-                    extend: {
-                        fontFamily: {
-                            sans: ["Inter","ui-sans-serif","system-ui","-apple-system","Segoe UI","Roboto","Ubuntu","Cantarell","Noto Sans","Helvetica Neue","Arial","sans-serif"],
-                            mono: ["JetBrains Mono","ui-monospace","SFMono-Regular","Menlo","Monaco","Consolas","Liberation Mono","Courier New","monospace"]
-                        }
-                    }
-                }
-            }
-        </script>
 </head>
 <body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col font-sans">
             <header class="p-4 border-b border-gray-800">
@@ -155,36 +143,10 @@
         </div>
     </footer>
 
+    <script src="/static/js/utils.js"></script>
     <script>
     // Config
     // Autodetecção resiliente da API: tenta /api (via Nginx) e faz fallback para localhost:8000 quando necessário.
-    let API_BASE = null;
-    async function detectApiBase() {
-        const candidates = [];
-        if (location.origin.startsWith('http')) {
-            // Primeiro tenta o proxy do Nginx no mesmo host
-            candidates.push('/api');
-            // Depois tenta a porta padrão da API diretamente
-            candidates.push(`${location.protocol}//${location.hostname}:8000`);
-            // E por fim 127.0.0.1
-            candidates.push('http://127.0.0.1:8000');
-        } else {
-            candidates.push('http://localhost:8000');
-            candidates.push('http://127.0.0.1:8000');
-        }
-        for (const base of candidates) {
-            try {
-                const r = await fetch(`${base}/techniques`, { method: 'GET' });
-                if (r.ok) { API_BASE = base; break; }
-            } catch (_) { /* tenta próximo */ }
-        }
-        if (!API_BASE) {
-            // Último recurso
-            API_BASE = 'http://localhost:8000';
-        }
-        return API_BASE;
-    }
-    // Dispara detecção imediatamente e mantém a promise para reutilizar
     const apiDetectPromise = detectApiBase();
 
     // CSS inline já cobre estilos necessários, então não precisamos de fallback de arquivos.
@@ -199,10 +161,14 @@
     function addMessage(sender, text) {
         const wrap = document.createElement('div');
         wrap.className = `p-2 rounded ${sender==='user' ? 'bg-blue-900/50' : 'bg-gray-800'}`;
-        wrap.innerHTML = `<strong class="${sender==='user' ? 'text-blue-300' : 'text-green-300'}">${sender==='user' ? 'Você' : 'CyberAI'}:</strong> <span class="whitespace-pre-wrap">${text}</span>`;
+        const formattedText = sender === 'user' ? escapeHtml(text) : formatResponse(text);
+        wrap.innerHTML = `<strong class="${sender==='user' ? 'text-blue-300' : 'text-green-300'}">${sender==='user' ? 'Você' : 'CyberAI'}:</strong> <span class="whitespace-pre-wrap">${formattedText}</span>`;
         const box = document.getElementById('chatMessages');
         box.appendChild(wrap);
         box.scrollTop = box.scrollHeight;
+        if (sender !== 'user') {
+            applyHighlight();
+        }
     }
 
     function insertPayload(type) {
@@ -229,8 +195,8 @@
         document.getElementById('userInput').value = '';
 
         try {
-            await apiDetectPromise;
-            const res = await fetch(`${API_BASE}/generate`, {
+            const apiBase = await apiDetectPromise;
+            const res = await fetch(`${apiBase}/generate`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ prompt: message, technique: '', context: '', target: '' })
@@ -247,7 +213,6 @@
             }
             const data = await res.json();
             addMessage('bot', data.response || 'Sem resposta.');
-            // Opcional: destacar code fences se presentes (não convertemos pra <pre><code> aqui para manter simplicidade)
         } catch (err) {
             addMessage('bot', 'Erro ao comunicar com a API.');
             console.error(err);

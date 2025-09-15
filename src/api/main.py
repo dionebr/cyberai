@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, APIRouter
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -10,6 +10,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="CyberAI Offensive API", version="1.0")
+api_router = APIRouter(prefix="/api")
 
 app.add_middleware(
 	CORSMiddleware,
@@ -69,7 +70,7 @@ TECHNIQUE_PROMPTS = {
     ,"treinamento": "Trilhas de estudo e prática: CTFs, labs e materiais progressivos focados no objetivo informado. Estruture por níveis e inclua referências."
 }
 
-@app.post("/generate")
+@api_router.post("/generate")
 async def generate_response(request: PromptRequest):
 	technique_prompt = TECHNIQUE_PROMPTS.get(request.technique, "")
 	system_prompt = f"""
@@ -105,7 +106,7 @@ async def generate_response(request: PromptRequest):
 		logger.error(f"Error generating response: {str(e)}")
 		raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/generate_exploit")
+@api_router.post("/generate_exploit")
 async def generate_exploit(request: ExploitRequest):
 	exploit_prompt = f"""
 	Gere um exploit completo para:
@@ -143,13 +144,15 @@ async def generate_exploit(request: ExploitRequest):
 		logger.error(f"Error generating exploit: {str(e)}")
 		raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/techniques")
+@api_router.get("/techniques")
 async def get_techniques():
 	return {"techniques": list(TECHNIQUE_PROMPTS.keys())}
 
-@app.get("/models")
+@api_router.get("/models")
 async def get_models():
 	return {"models": ["mistral-7b-instruct-v0.2.Q4_K_M.gguf"]}
+
+app.include_router(api_router)
 
 if __name__ == "__main__":
 	import uvicorn
