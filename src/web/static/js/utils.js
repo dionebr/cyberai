@@ -27,11 +27,11 @@
     const candidates = [];
     if (location.origin.startsWith('http')) {
       candidates.push('/api');
-      candidates.push(`${location.protocol}//${location.hostname}:8000`);
-      candidates.push('http://127.0.0.1:8000');
+      candidates.push(`${location.protocol}//${location.hostname}:8000/api`);
+      candidates.push('http://127.0.0.1:8000/api');
     } else {
-      candidates.push('http://localhost:8000');
-      candidates.push('http://127.0.0.1:8000');
+      candidates.push('http://localhost:8000/api');
+      candidates.push('http://127.0.0.1:8000/api');
     }
     for (const base of candidates){
       try{
@@ -39,7 +39,7 @@
         if (r.ok){ window.API_BASE = base; break; }
       }catch(_){ /* try next */ }
     }
-    if (!window.API_BASE) window.API_BASE = 'http://localhost:8000';
+    if (!window.API_BASE) window.API_BASE = '/api';
     return window.API_BASE;
   }
 

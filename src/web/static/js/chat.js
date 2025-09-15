@@ -3,7 +3,7 @@ import { formatCodeBlock } from './main.js';
 export async function sendMessage(message, context, technique, target) {
 	if (!message) return;
 	try {
-		const response = await fetch('http://localhost:8000/generate', {
+		const response = await fetch('/api/generate', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ prompt: message, context, technique, target })
