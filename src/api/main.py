@@ -196,6 +196,144 @@ async def get_models():
 		]
 	}
 
+@api_router.get("/gpu-status")
+async def get_gpu_status():
+	"""
+	Endpoint para verificar o status atual da GPU
+	"""
+	try:
+		import subprocess
+		from src.api.core.llama_client import detect_gpu_support
+		
+		# Verificar se NVIDIA está disponível no sistema
+		try:
+			result = subprocess.run(['nvidia-smi'], capture_output=True, text=True, timeout=5)
+			nvidia_available = result.returncode == 0
+			if nvidia_available:
+				# Extrair info básica da GPU
+				lines = result.stdout.split('\n')
+				gpu_info = "GPU detectada"
+				for line in lines:
+					if "GTX" in line or "RTX" in line or "GeForce" in line:
+						gpu_info = line.split()[2:5]  # Nome da GPU
+						gpu_info = " ".join(gpu_info)
+						break
+			else:
+				gpu_info = None
+		except:
+			nvidia_available = False
+			gpu_info = None
+		
+		# Verificar se llama-cpp-python tem suporte CUDA
+		cuda_support = detect_gpu_support()
+		
+		# Determinar status
+		if nvidia_available and cuda_support:
+			status = "GPU Disponível e Ativada"
+			gpu_enabled = True
+		elif nvidia_available and not cuda_support:
+			status = "GPU Detectada (CUDA não compilado)"
+			gpu_enabled = False
+		else:
+			status = "CPU Only"
+			gpu_enabled = False
+		
+		return JSONResponse(content={
+			"gpu_enabled": gpu_enabled,
+			"nvidia_available": nvidia_available,
+			"cuda_support": cuda_support,
+			"status": status,
+			"gpu_info": gpu_info or "Nenhuma GPU detectada"
+		})
+		
+	except Exception as e:
+		logger.error(f"Erro ao verificar status GPU: {str(e)}")
+		return JSONResponse(content={
+			"gpu_enabled": False,
+			"nvidia_available": False,
+			"cuda_support": False,
+			"status": "Erro ao verificar GPU",
+			"gpu_info": str(e)
+		})
+
+class GPUToggleRequest(BaseModel):
+	enable_gpu: bool
+
+@api_router.post("/toggle-gpu")
+async def toggle_gpu_mode(request: GPUToggleRequest):
+	"""
+	Endpoint para alternar entre modo CPU e GPU
+	Usa o gpu_manager.py para fazer a troca real dos containers
+	"""
+	try:
+		import subprocess
+		import os
+		import asyncio
+		
+		# Caminho do projeto
+		project_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+		gpu_manager_path = os.path.join(project_path, "gpu_manager.py")
+		
+		target_mode = "gpu" if request.enable_gpu else "cpu"
+		
+		logger.info(f"🔄 Tentando alternar para modo {target_mode.upper()}...")
+		
+		try:
+			# Executar gpu_manager em background
+			process = subprocess.Popen(
+				["python", gpu_manager_path, target_mode],
+				cwd=project_path,
+				stdout=subprocess.PIPE,
+				stderr=subprocess.PIPE,
+				text=True
+			)
+			
+			# Aguardar conclusão (máximo 30 segundos)
+			stdout, stderr = process.communicate(timeout=30)
+			
+			if process.returncode == 0:
+				logger.info(f"✅ Modo {target_mode.upper()} ativado com sucesso")
+				
+				# Aguardar containers estarem prontos
+				await asyncio.sleep(3)
+				
+				return JSONResponse(content={
+					"success": True,
+					"gpu_enabled": request.enable_gpu,
+					"status": f"{target_mode.upper()} Ativado",
+					"message": f"Sistema alterado para modo {target_mode.upper()} com sucesso!",
+					"details": stdout.strip() if stdout else ""
+				})
+			else:
+				error_msg = stderr.strip() if stderr else "Erro desconhecido"
+				logger.error(f"❌ Erro ao alternar para {target_mode}: {error_msg}")
+				
+				return JSONResponse(content={
+					"success": False,
+					"gpu_enabled": not request.enable_gpu,  # Manter estado anterior
+					"status": "Erro na Alternação",
+					"message": f"Erro ao alternar para {target_mode}: {error_msg}"
+				}, status_code=400)
+				
+		except subprocess.TimeoutExpired:
+			process.kill()
+			logger.error("⏰ Timeout ao alternar modo GPU/CPU")
+			return JSONResponse(content={
+				"success": False,
+				"gpu_enabled": not request.enable_gpu,
+				"status": "Timeout",
+				"message": "Timeout ao alternar modo. Tente novamente."
+			}, status_code=408)
+			
+	except Exception as e:
+		logger.error(f"Erro crítico ao alternar GPU: {str(e)}")
+		return JSONResponse(content={
+			"success": False,
+			"gpu_enabled": False,
+			"status": "Erro Crítico",
+			"message": f"Erro interno: {str(e)}"
+		}, status_code=500)
+
 app.include_router(api_router)
 
 if __name__ == "__main__":
