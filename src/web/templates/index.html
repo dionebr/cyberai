@@ -480,23 +480,34 @@
                         body: JSON.stringify({ enable_gpu: newState })
                     });
                     
+                    const result = await response.json();
+                    
                     if (response.ok) {
-                        const result = await response.json();
                         updateConnectionStatus(true, result.status || (newState ? 'GPU Ativada' : 'CPU Ativada'));
                         
                         // Mostrar notificação de sucesso
-                        showNotification(`Modo ${newState ? 'GPU' : 'CPU'} ativado com sucesso!`, 'success');
+                        showNotification(`✅ ${result.message}`, 'success');
                     } else {
-                        // Reverter em caso de erro
+                        // Reverter estado visual
                         updateGPUStatus(!newState);
-                        updateConnectionStatus(false, 'Erro ao alterar modo');
-                        showNotification('Erro ao alterar modo. Tente novamente.', 'error');
+                        updateConnectionStatus(true, 'Sistema Híbrido');
+                        
+                        // Mostrar mensagem específica do erro
+                        if (response.status === 400 && result.message) {
+                            if (result.message.includes('GPU NVIDIA não detectada')) {
+                                showNotification('⚠️ GPU não disponível no container atual. Use docker-compose.gpu.yml para ativar GPU.', 'warning');
+                            } else {
+                                showNotification(`❌ ${result.message}`, 'error');
+                            }
+                        } else {
+                            showNotification('❌ Erro ao alterar modo. Tente novamente.', 'error');
+                        }
                     }
                 } catch (error) {
-                    // Reverter em caso de erro
+                    // Reverter em caso de erro de rede
                     updateGPUStatus(!newState);
                     updateConnectionStatus(false, 'Erro de conexão');
-                    showNotification('Erro de conexão ao alterar modo.', 'error');
+                    showNotification('❌ Erro de conexão ao alterar modo.', 'error');
                     console.error('Erro toggle GPU:', error);
                 }
                 
@@ -505,18 +516,30 @@
 
             function showNotification(message, type = 'info') {
                 const notification = document.createElement('div');
-                notification.className = `fixed top-4 right-4 px-4 py-2 rounded-lg text-white z-50 transition-opacity ${
+                notification.className = `fixed top-4 right-4 px-4 py-3 rounded-lg text-white z-50 transition-all duration-300 transform translate-x-0 ${
                     type === 'success' ? 'bg-green-600' : 
-                    type === 'error' ? 'bg-red-600' : 'bg-blue-600'
+                    type === 'error' ? 'bg-red-600' : 
+                    type === 'warning' ? 'bg-yellow-600' : 'bg-blue-600'
                 }`;
-                notification.textContent = message;
+                notification.innerHTML = message;
                 
+                // Animar entrada
+                notification.style.transform = 'translateX(100%)';
                 document.body.appendChild(notification);
                 
                 setTimeout(() => {
-                    notification.style.opacity = '0';
-                    setTimeout(() => document.body.removeChild(notification), 300);
-                }, 3000);
+                    notification.style.transform = 'translateX(0)';
+                }, 10);
+                
+                // Remover após 4 segundos
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            document.body.removeChild(notification);
+                        }
+                    }, 300);
+                }, 4000);
             }
 
             // Inicializar status GPU (assumir CPU por padrão)

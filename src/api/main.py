@@ -278,6 +278,36 @@ async def toggle_gpu_mode(request: GPUToggleRequest):
 		
 		logger.info(f"🔄 Tentando alternar para modo {target_mode.upper()}...")
 		
+		# Primeiro, verificar o status atual
+		try:
+			status_process = subprocess.Popen(
+				["python", gpu_manager_path, "status"],
+				cwd=project_path,
+				stdout=subprocess.PIPE,
+				stderr=subprocess.PIPE,
+				text=True
+			)
+			status_stdout, status_stderr = status_process.communicate(timeout=10)
+			
+			if "gpu_available: True" in status_stdout and request.enable_gpu:
+				logger.info("✅ GPU disponível no sistema, procedendo com ativação...")
+			elif not request.enable_gpu:
+				logger.info("💻 Alternando para modo CPU...")
+			else:
+				logger.warning("❌ GPU não disponível no sistema host")
+				return JSONResponse(content={
+					"success": False,
+					"gpu_enabled": False,
+					"status": "GPU Indisponível",
+					"message": "GPU NVIDIA não detectada no sistema host. Instale drivers NVIDIA primeiro."
+				}, status_code=400)
+				
+		except subprocess.TimeoutExpired:
+			status_process.kill()
+			logger.error("⏰ Timeout verificando status GPU")
+		except Exception as e:
+			logger.warning(f"Erro verificando status: {e}")
+		
 		try:
 			# Executar gpu_manager em background
 			process = subprocess.Popen(
