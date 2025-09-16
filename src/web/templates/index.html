@@ -12,6 +12,31 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     
+    <style>
+        /* Custom styling for model selector dropdown */
+        #modelSelector {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23CBD5E1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-position: right 8px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+        }
+        
+        #modelSelector option {
+            background-color: #111827 !important;
+            color: #F3F4F6 !important;
+            padding: 8px 12px !important;
+        }
+        
+        #modelSelector option:checked {
+            background-color: #3B82F6 !important;
+            color: white !important;
+        }
+        
+        #modelSelector option:hover {
+            background-color: #1F2937 !important;
+        }
+    </style>
+    
 </head>
 <body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col font-sans">
             <header class="p-4 border-b border-gray-800">
@@ -59,10 +84,10 @@
                                     </svg>
                                     <span class="text-xs font-medium text-gray-300">Modelo</span>
                                 </div>
-                                <select id="modelSelector" class="bg-gray-700 border border-gray-600 rounded-lg px-2 lg:px-3 py-1 text-xs lg:text-sm text-gray-200 font-medium focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 min-w-[100px] lg:min-w-[140px] cursor-pointer">
-                                    <option value="auto">🤖 Auto</option>
-                                    <option value="tinyllama">⚡ Rápido</option>
-                                    <option value="mistral">🧠 Completo</option>
+                                <select id="modelSelector" class="bg-gray-900 border border-gray-600 rounded-lg px-2 lg:px-3 py-1 text-xs lg:text-sm text-gray-100 font-medium focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 min-w-[100px] lg:min-w-[140px] cursor-pointer appearance-none">
+                                    <option value="auto" class="bg-gray-900 text-gray-100">🤖 Auto</option>
+                                    <option value="tinyllama" class="bg-gray-900 text-gray-100">⚡ Rápido</option>
+                                    <option value="mistral" class="bg-gray-900 text-gray-100">🧠 Completo</option>
                                 </select>
                             </div>
                         </div>
