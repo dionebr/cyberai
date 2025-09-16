@@ -1,14 +1,21 @@
-FROM pytorch/pytorch:2.1.0-cuda11.8-cudnn8-devel
+FROM ubuntu:20.04
 WORKDIR /app
 
 # Install system dependencies
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-        build-essential cmake curl git && \
+        python3.10 python3.10-dev python3-pip python3.10-venv \
+        build-essential cmake curl git wget \
+        software-properties-common \
+        nvidia-cuda-toolkit && \
     rm -rf /var/lib/apt/lists/*
 
+# Create symbolic links for python
+RUN ln -s /usr/bin/python3.10 /usr/bin/python && \
+    ln -s /usr/bin/pip3 /usr/bin/pip
+
 # Set CUDA environment variables
-ENV CUDA_HOME=/usr/local/cuda
+ENV CUDA_HOME=/usr/lib/cuda
 ENV PATH=${CUDA_HOME}/bin:${PATH}
 ENV LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
 ENV FORCE_CMAKE=1
@@ -19,7 +26,7 @@ COPY requirements.txt ./
 RUN pip install --upgrade pip setuptools wheel
 
 # Install llama-cpp-python with CUDA support
-RUN CMAKE_ARGS="-DLLAMA_CUBLAS=on" pip install llama-cpp-python --force-reinstall --no-deps
+RUN CMAKE_ARGS="-DLLAMA_CUBLAS=on" FORCE_CMAKE=1 pip install llama-cpp-python==0.2.78 --force-reinstall --no-deps --verbose
 
 # Install other requirements
 RUN pip install --no-cache-dir -r requirements.txt
